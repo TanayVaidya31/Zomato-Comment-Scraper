@@ -9,15 +9,11 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.action_chains import ActionChains
 
 def initiate(url):
-    # Add a bypass in case the webdriver path is incorrect in drivers.json file
-    if not url.endswith("reviews"):
-        url += "/reviews"
-
     chromedriver_path = ChromeDriverManager().install()
     if not chromedriver_path.endswith("chromedriver.exe"):
         chromedriver_dir = os.path.dirname(chromedriver_path)
         chromedriver_path = os.path.join(chromedriver_dir, "chromedriver.exe")
-    
+
     service = Service(chromedriver_path)
     options = webdriver.ChromeOptions()
     options.add_argument("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36")
@@ -33,9 +29,9 @@ def initiate(url):
     driver.maximize_window()
     driver.get(url)  # Enter Website URL
 
-    wait=WebDriverWait(driver,3)
+    wait=WebDriverWait(driver,10)
     time.sleep(3)
-    
+
     #rating = driver.find_elements(By.CLASS_NAME, '//div[@class="sc-1q7bklc-1 cILgox"]')
     rating1 = driver.find_elements(By.XPATH, '//div[@class="sc-1q7bklc-5 kHxpSk"]//div[@class="sc-1q7bklc-1 cILgox"]')
     #print(len(rating))
@@ -48,11 +44,14 @@ def initiate(url):
     #print(len(review))
     flag = False
     for count in range(100):
+        # print(count)
         try:
             time.sleep(1)
-            review = wait.until(EC.presence_of_all_elements_located((By.XPATH, '//p[@class="sc-1hez2tp-0 sc-eCXBzT iIAoyK"]')))
-            name = wait.until(EC.presence_of_all_elements_located((By.XPATH, '//p[@class="sc-1hez2tp-0 sc-gSbCxx gfIQBW"]')))
+            # print("pass1")
+            review = wait.until(EC.presence_of_all_elements_located((By.XPATH, '//p[@class="sc-1hez2tp-0 sc-hfLElm hreYiP"]')))
+            name = wait.until(EC.presence_of_all_elements_located((By.XPATH, '//p[@class="sc-1hez2tp-0 sc-lenlpJ dCAQIv"]')))
             rating = wait.until(EC.presence_of_all_elements_located((By.XPATH, '//div[@class="sc-1q7bklc-1 cILgox"]')))
+            # print("pass2")
             for i in range(2,7):
                 try:
                     reviewpara = review[i-2].text.strip()
@@ -66,6 +65,7 @@ def initiate(url):
             # Scroll to make sure that button is visible
             driver.execute_script("window.scrollTo(0, 1500);")
             time.sleep(0.5)
+
             # Try multiple button location strategies
             try:
                 # First try:
@@ -75,25 +75,24 @@ def initiate(url):
             except:
                 print("End of Pages")
                 flag = True
-            
-            # Aaizhavli
+
+            # Last Resort
             # try:
             #     next_button.click()
             #     print("third try")
             # except:
             #     driver.execute_script("arguments[0].click();", next_button)
-            #     print("fourt try")
-            
+            #     print("fourth try")
+
         except Exception as e:
-            #print(f"Error during pagination: {str(e)}")
+            print(f"Error during pagination: {str(e)}")
             break
         if flag==True:
             break
-    
-    
+
     driver.quit()
     print("Driver Stopped")
 
 # Define the review url here
-url = "https://www.zomato.com/mumbai/persian-darbar-3-kurla"
+url = "https://www.zomato.com/mumbai/persian-darbar-3-kurla/reviews"
 initiate(url)
