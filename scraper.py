@@ -8,7 +8,10 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.action_chains import ActionChains
 
+# The Main Scraping Function
 def initiate(url):
+    
+    # Define path and install Chromedriver
     chromedriver_path = ChromeDriverManager().install()
     if not chromedriver_path.endswith("chromedriver.exe"):
         chromedriver_dir = os.path.dirname(chromedriver_path)
@@ -18,40 +21,36 @@ def initiate(url):
     options = webdriver.ChromeOptions()
     options.add_argument("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36")
     options.add_experimental_option("excludeSwitches", ["enable-automation"])
-    # The below feature stops chrome from flagging the browser as being controlled by and automated software, thereby allowing to bypass all bot detection
     options.add_argument('--disable-blink-features=AutomationControlled')
-    # Disable the below feature if you actually want to show selenium working
     options.add_argument("--headless=new")
 
     # Begin the driver
     driver = webdriver.Chrome(service=service, options=options)
     actions = ActionChains(driver)
     driver.maximize_window()
-    driver.get(url)  # Enter Website URL
+    driver.get(url)
 
     wait=WebDriverWait(driver,10)
     time.sleep(3)
 
-    #rating = driver.find_elements(By.CLASS_NAME, '//div[@class="sc-1q7bklc-1 cILgox"]')
+    # Define and display the main raiting of the restaurant
     rating1 = driver.find_elements(By.XPATH, '//div[@class="sc-1q7bklc-5 kHxpSk"]//div[@class="sc-1q7bklc-1 cILgox"]')
-    #print(len(rating))
     Dinerating = rating1[0].text.strip()
     Delirating = rating1[1].text.strip()
     print("Dining Ratings: ", Dinerating, " Stars")
     print("Delivery Ratings: ", Delirating, " Stars")
     review = driver.find_elements(By.XPATH, '//p[@class="sc-1hez2tp-0 sc-eCXBzT iIAoyK"]')
     name = driver.find_elements(By.XPATH, '//p[@class="sc-1hez2tp-0 sc-gSbCxx gfIQBW"]')
-    #print(len(review))
     flag = False
     for count in range(100):
-        # print(count)
         try:
-            time.sleep(1)
-            # print("pass1")
+            time.sleep(0.5)
+            # Locate the elements and display them
             review = wait.until(EC.presence_of_all_elements_located((By.XPATH, '//p[@class="sc-1hez2tp-0 sc-hfLElm hreYiP"]')))
             name = wait.until(EC.presence_of_all_elements_located((By.XPATH, '//p[@class="sc-1hez2tp-0 sc-lenlpJ dCAQIv"]')))
             rating = wait.until(EC.presence_of_all_elements_located((By.XPATH, '//div[@class="sc-1q7bklc-1 cILgox"]')))
-            # print("pass2")
+            
+            # Locate and display the 5 comments
             for i in range(2,7):
                 try:
                     reviewpara = review[i-2].text.strip()
@@ -62,7 +61,8 @@ def initiate(url):
                     print(f"\n\nReview {i-1 + count*5}: ", reviewrating, "Stars Rated\nFrom", reviewname, ":\n", reviewpara, "\n")
                 except IndexError:
                     print("Reached end of reviews")
-            # Scroll to make sure that button is visible
+
+            # Scroll to make sure that next page button is visible
             driver.execute_script("window.scrollTo(0, 1500);")
             time.sleep(0.5)
 
@@ -93,6 +93,8 @@ def initiate(url):
     driver.quit()
     print("Driver Stopped")
 
+
 # Define the review url here
+# Example: 
 url = "https://www.zomato.com/mumbai/persian-darbar-3-kurla/reviews"
 initiate(url)
